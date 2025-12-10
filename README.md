@@ -40,7 +40,7 @@ A powerful, modern web application and CLI tool for analyzing JavaScript files t
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/tobiasGuta/JavaScript-Security-Analyzer-Enhanced-Edition-.git
+git clone https://github.com/tobiasGuta/JavaScript-Security-Analyzer-Enhanced-Edition.git
 cd JS-Analyser
 ```
 
