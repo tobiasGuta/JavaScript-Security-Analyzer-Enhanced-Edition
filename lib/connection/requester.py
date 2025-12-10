@@ -54,6 +54,11 @@ from lib.utils.common import safequote
 from lib.utils.file import FileUtils
 from lib.utils.mimetype import guess_mimetype
 
+try:
+    import cloudscraper
+except ImportError:
+    cloudscraper = None
+
 # Disable InsecureRequestWarning from urllib3
 urllib3.disable_warnings(urllib3.exceptions.SecurityWarning)
 # Use custom `socket.getaddrinfo` for `requests` which supports DNS caching
@@ -133,6 +138,17 @@ class Requester(BaseRequester):
         self.session = requests.Session()
         self.session.verify = False
         self.session.cert = self._cert
+
+        if options["bypass_waf"]:
+            if cloudscraper:
+                try:
+                    self.session = cloudscraper.create_scraper(sess=self.session)
+                except Exception as e:
+                    logger.warning(f"Failed to initialize cloudscraper: {e}")
+            else:
+                logger.error("Cloudscraper is not installed. Please install it with 'pip install cloudscraper' to use --bypass-waf")
+                import sys
+                sys.exit(1)
 
         for scheme in ("http://", "https://"):
             self.session.mount(

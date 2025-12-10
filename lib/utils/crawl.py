@@ -38,9 +38,12 @@ class Crawler:
     @classmethod
     def crawl(cls, response):
         scope = "/".join(response.url.split("/")[:3]) + "/"
+        content_type = response.headers.get("content-type", "")
 
-        if "text/html" in response.headers.get("content-type", ""):
+        if "text/html" in content_type:
             return cls.html_crawl(response.url, scope, response.content)
+        elif "javascript" in content_type or response.path.endswith(".js"):
+            return cls.js_crawl(response.url, scope, response.content)
         elif response.path == "robots.txt":
             return cls.robots_crawl(response.url, scope, response.content)
         else:
@@ -48,9 +51,37 @@ class Crawler:
 
     @staticmethod
     @lru_cache(maxsize=None)
+    def js_crawl(url, scope, content):
+        results = set()
+
+        # 1. Absolute URLs matching scope
+        regex_absolute = re.escape(scope) + "[a-zA-Z0-9-._~!$&*+,;=:@?%/]+"
+        for match in re.findall(regex_absolute, content):
+            results.add(match[len(scope):])
+
+        # 2. Relative paths starting with /
+        regex_root = r"['\"](/[a-zA-Z0-9-._~!$&*+,;=:@?%/]+)['\"]"
+        for match in re.findall(regex_root, content):
+            results.add(match[1:])
+
+        # 3. Relative paths with subdirectories
+        regex_subdir = r"['\"]([a-zA-Z0-9-._~!$&*+,;=:@?%]+(?:/[a-zA-Z0-9-._~!$&*+,;=:@?%]+)+)['\"]"
+        for match in re.findall(regex_subdir, content):
+            if match not in ["application/json", "text/html", "text/plain"]:
+                results.add(match)
+
+        # 4. Files with extensions
+        regex_files = r"['\"]([a-zA-Z0-9-._~!$&*+,;=:@?%]+\.(?:json|xml|php|asp|aspx|jsp|html|htm|js|css|map|txt|conf|config|sql|db|bak|old))['\"]"
+        for match in re.findall(regex_files, content):
+            results.add(match)
+
+        return _filter(results)
+
+    @staticmethod
+    @lru_cache(maxsize=None)
     def text_crawl(url, scope, content):
         results = []
-        regex = re.escape(scope) + "[a-zA-Z0-9-._~!$&*+,;=:@?%]+"
+        regex = re.escape(scope) + "[a-zA-Z0-9-._~!$&*+,;=:@?%/]+"
 
         for match in re.findall(regex, content):
             results.append(match[len(scope):])

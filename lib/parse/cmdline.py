@@ -323,6 +323,12 @@ def parse_arguments() -> Values:
         dest="exit_on_error",
         help="Exit whenever an error occurs",
     )
+    general.add_option(
+        "--bypass-waf",
+        action="store_true",
+        dest="bypass_waf",
+        help="Try to bypass WAF using cloudscraper (requires cloudscraper installed)",
+    )
 
     # Request Settings
     request = OptionGroup(parser, "Request Settings")

@@ -165,6 +165,10 @@ class Controller:
             interface.log_file(options["log_file"])
 
     def run(self) -> None:
+        if options["bypass_waf"] and options["async_mode"]:
+            interface.warning("Disabling async mode because --bypass-waf is enabled (cloudscraper is synchronous)")
+            options["async_mode"] = False
+
         if options["async_mode"]:
             from lib.connection.requester import AsyncRequester as Requester
             from lib.core.fuzzer import AsyncFuzzer as Fuzzer

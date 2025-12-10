@@ -33,7 +33,6 @@ if sys.version_info < (3, 9):
 
 # silence pkg_resources deprecation warnings
 warnings.simplefilter("ignore", DeprecationWarning)
-from pkg_resources import DistributionNotFound, VersionConflict  # noqa: E402
 
 
 def main():
@@ -43,7 +42,7 @@ def main():
     if config.safe_getboolean("options", "check-dependencies", False):
         try:
             check_dependencies()
-        except (DistributionNotFound, VersionConflict):
+        except Exception:
             option = input("Missing required dependencies to run.\n"
                            "Do you want dirsearch to automatically install them? [Y/n] ")
 

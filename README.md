@@ -1,8 +1,7 @@
-<img src="static/logo.png#gh-light-mode-only" alt="dirsearch logo (light)" width="675px">
-<img src="static/logo-dark.png#gh-dark-mode-only" alt="dirsearch logo (dark)" width="675px">
-
-dirsearch - Web path discovery
+dirsearch - Web path discovery (Modified Version)
 =========
+
+> **Note:** This repository is a modified version of the original [dirsearch](https://github.com/maurosoria/dirsearch) by Mauro Soria. It contains custom enhancements including WAF detection and bypass capabilities.
 
 ![Build](https://img.shields.io/badge/Built%20with-Python-Blue)
 ![License](https://img.shields.io/badge/license-GNU_General_Public_License-_red.svg)
@@ -22,6 +21,7 @@ dirsearch - Web path discovery
 
 Table of Contents
 ------------
+* [Modifications](#modifications)
 * [Installation](#installation--usage)
 * [Wordlists](#wordlists-important)
 * [Options](#options)
@@ -52,6 +52,13 @@ Table of Contents
 * [License](#license)
 
 
+Modifications
+------------
+This version includes the following enhancements:
+- **WAF Detection**: Automatically detects if a WAF (Web Application Firewall) is present (e.g., Cloudflare, CloudFront, Incapsula) and warns the user.
+- **WAF Bypass**: Added `--bypass-waf` flag to use `cloudscraper` for bypassing WAF protections like Cloudflare's "Under Attack Mode".
+- **Enhanced Crawling**: Improved JavaScript and text crawling capabilities.
+
 Installation & Usage
 ------------
 
@@ -59,11 +66,7 @@ Installation & Usage
 
 Choose one of these installation options:
 
-- Install with **git**: `git clone https://github.com/maurosoria/dirsearch.git --depth 1` (**RECOMMENDED**)
-- Install with ZIP file: [Download here](https://github.com/maurosoria/dirsearch/archive/master.zip)
-- Install with Docker: `docker build -t "dirsearch:v0.4.3" .` (more information can be found [here](https://github.com/maurosoria/dirsearch#support-docker))
-- Install with PyPi: `pip3 install dirsearch` or `pip install dirsearch`
-- Install with Kali Linux: `sudo apt-get install dirsearch` (deprecated)
+- Install with **git**: `git clone https://github.com/tobiasGuta/dirsearch---Web-path-discovery-Modified-Version.git`
 
 
 Wordlists (IMPORTANT)

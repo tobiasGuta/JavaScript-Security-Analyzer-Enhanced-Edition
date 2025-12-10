@@ -36,6 +36,7 @@ from lib.core.settings import (
     DEFAULT_TEST_SUFFIXES,
     WILDCARD_TEST_POINT_MARKER,
 )
+from lib.core.waf import WAF
 from lib.parse.url import clean_path
 from lib.utils.common import get_readable_size, lstrip_once
 
@@ -57,6 +58,7 @@ class BaseFuzzer:
         self.match_callbacks = match_callbacks
         self.not_found_callbacks = not_found_callbacks
         self.error_callbacks = error_callbacks
+        self.waf_detected = False
 
         self.scanners: dict[str, dict[str, Scanner]] = {
             "default": {},
@@ -165,6 +167,15 @@ class Fuzzer(BaseFuzzer):
             self._requester, path=self._base_path + WILDCARD_TEST_POINT_MARKER
         )
 
+        # Check for WAF on the base path first
+        try:
+            response = self._requester.request(self._base_path)
+            if waf_name := WAF.detect(response):
+                self.waf_detected = True
+                print(f"[WARNING] WAF Detected: {waf_name}")
+        except RequestException:
+            pass
+
         if options["exclude_response"]:
             self.scanners["default"]["custom"] = Scanner(
                 self._requester, tested=self.scanners, path=options["exclude_response"]
@@ -246,6 +257,11 @@ class Fuzzer(BaseFuzzer):
                 callback(e)
             return
 
+        if not self.waf_detected:
+            if waf_name := WAF.detect(response):
+                self.waf_detected = True
+                logger.warning(f"WAF Detected: {waf_name}")
+
         if self.is_excluded(response):
             for callback in self.not_found_callbacks:
                 callback(response)
@@ -326,6 +342,15 @@ class AsyncFuzzer(BaseFuzzer):
             }
         )
 
+        # Check for WAF on the base path first
+        try:
+            response = await self._requester.request(self._base_path)
+            if waf_name := WAF.detect(response):
+                self.waf_detected = True
+                print(f"[WARNING] WAF Detected: {waf_name}")
+        except RequestException:
+            pass
+
         if options["exclude_response"]:
             self.scanners["default"]["custom"] = await AsyncScanner.create(
                 self._requester, tested=self.scanners, path=options["exclude_response"]
@@ -388,6 +413,11 @@ class AsyncFuzzer(BaseFuzzer):
             for callback in self.error_callbacks:
                 callback(e)
             return
+
+        if not self.waf_detected:
+            if waf_name := WAF.detect(response):
+                self.waf_detected = True
+                logger.warning(f"WAF Detected: {waf_name}")
 
         if self.is_excluded(response):
             for callback in self.not_found_callbacks:
